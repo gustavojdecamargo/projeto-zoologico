@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ZoologicoServices {
-    Zoologico zoologico = new Zoologico();
+    Zoologico zoologico;
     Scanner scanner = new Scanner(System.in);
 
     private int idRecinto;
@@ -25,11 +25,11 @@ public class ZoologicoServices {
 
 
     public void cadastrarAnimal() {
-        if (zoologico.verificadorDeRecintos() == true) {
+        if (zoologico.verificadorDeRecintos()) {
             int cont = 0;
             List<Recinto> recintosVazios = new ArrayList<>();
-            for (Recinto recinto : zoologico.recintos) {
-                if (recinto.estaLotado() == false) {
+            for (Recinto recinto : zoologico.getRecintos()) {
+                if (!recinto.estaLotado()) {
                     cont += 1;
                     recintosVazios.add(recinto);
                 }
@@ -38,7 +38,7 @@ public class ZoologicoServices {
             if (cont != 0) {
                 System.out.println("Recintos disponíveis.");
                 for (int i = 0; i < cont; i++) {
-                    System.out.println((i + 1) + " - " + recintosVazios.get(i) + " | " + recintosVazios.get(i).animais.size() + "/" + recintosVazios.get(i).getCapacidade());
+                    System.out.println((i + 1) + " - " + recintosVazios.get(i) + " | " + recintosVazios.get(i).getAnimais().size() + "/" + recintosVazios.get(i).getCapacidade());
                     System.out.println();
                 }
 
@@ -47,9 +47,9 @@ public class ZoologicoServices {
                 int opcaoDeRecintoParaCadastroAnimal = scanner.nextInt();
 
                 boolean verficadorDeRecinto = false;
-                for (Recinto recinto : zoologico.recintos) {
+                for (Recinto recinto : zoologico.getRecintos()) {
                     if (opcaoDeRecintoParaCadastroAnimal == recinto.getNumero()) {
-                        if (recinto.estaLotado() == false){
+                        if (!recinto.estaLotado()){
                             verficadorDeRecinto = true;
                             System.out.print("Digite o nome do animal: ");
                             String nome = scanner.next();
@@ -72,6 +72,9 @@ public class ZoologicoServices {
                                 case 2:
                                     sexo = Sexo.FEMEA;
                                     break;
+                                default:
+                                    System.out.println("Opção inválida!");
+                                    break;
                             }
 
                             for (int i = 0; i < cont; i++) {
@@ -83,7 +86,6 @@ public class ZoologicoServices {
                                     System.out.println("4 - Leão");
                                     System.out.println("5 - Macaco");
                                     int opcaoEspecieAnimal = scanner.nextInt();
-                                    Animal animal = null;
                                     if (opcaoEspecieAnimal == 1) {
                                         Arara arara = new Arara(nome, idade, peso, Especies.ARARA, sexo, recintosVazios.get(i));
                                         recintosVazios.get(i).adicionarAnimal(arara);
@@ -110,7 +112,7 @@ public class ZoologicoServices {
                     }
                 }
 
-                if (verficadorDeRecinto == false) {
+                if (!verficadorDeRecinto) {
                     System.out.println("Id de recinto inválido, verifique se digitou o id corretamente.");
                 }
 
@@ -150,24 +152,24 @@ public class ZoologicoServices {
     int opcaoCargoFuncionario = scanner.nextInt();
     if (opcaoCargoFuncionario == 1) {
         Veterinario veterinario = new Veterinario(nome, idade, salario, Cargo.VETERINARIO);
-        zoologico.funcionarios.add(veterinario);
+        zoologico.getFuncionarios().add(veterinario);
     } else if (opcaoCargoFuncionario == 2) {
         Tratador tratador = new Tratador(nome, idade, salario, Cargo.TRATADOR);
-        zoologico.funcionarios.add(tratador);
+        zoologico.getFuncionarios().add(tratador);
     } else {
         System.out.println("Opção inválida.");
     }
 }
 
     public void removerAnimalDoRecinto() {
-    if (zoologico.recintos.size() != 0) {
-        if (zoologico.verificadorDeAnimais() == true) {
+    if (!zoologico.getRecintos().isEmpty()) {
+        if (zoologico.verificadorDeAnimais()) {
             System.out.println("Digite o nome do recinto que deseja remover o animal: ");
             String nomeDoRecintoParaRemocao = scanner.next();
 
-            for (Recinto recinto : zoologico.recintos) {
+            for (Recinto recinto : zoologico.getRecintos()) {
                 if (nomeDoRecintoParaRemocao.equals(recinto.getNome())) {
-                    if (recinto.getAnimais().size() != 0){
+                    if (!recinto.getAnimais().isEmpty()){
                         System.out.println("Animais do recinto " + recinto.getNome() + ":");
                         for (Animal animal : recinto.getAnimais()){
                             animal.exibirDados();
@@ -179,10 +181,11 @@ public class ZoologicoServices {
                         for (Animal animal : recinto.getAnimais()){
                             if (animal.getNome().equals(nome)){
                                 verificadorDeAnimal = true;
+                                break;
                             }
                         }
                         recinto.getAnimais().removeIf(animal -> animal.getNome().equals(nome));
-                        if(verificadorDeAnimal == false){
+                        if(!verificadorDeAnimal){
                             System.out.println("Não há um animal com esse nome no recinto " + recinto.getNome() + ".");
                         } else {
                             System.out.println(nome + " removido de " + recinto.getNome() + ".");
@@ -206,33 +209,33 @@ public class ZoologicoServices {
     public void transferirAnimalDeRecinto() {
     Animal animalParaTransferencia = null;
     String recintoTransferencia = "";
-    int indexParaTransferencia = 0;
-    if (zoologico.recintos.size() != 0) {
+    if (!zoologico.getRecintos().isEmpty()) {
         /* Criar Metodo para varrer animais e implementar aqui:*/
         boolean haAnimais = false;
-        if (zoologico.recintos.size() >= 2) {
-            for (Recinto recinto : zoologico.recintos) {
-                if (recinto.getAnimais().size() != 0) {
+        if (zoologico.getRecintos().size() >= 2) {
+            for (Recinto recinto : zoologico.getRecintos()) {
+                if (!recinto.getAnimais().isEmpty()) {
                     haAnimais = true;
+                    break;
                 }
             }
 
-            if (haAnimais == true) {
+            if (haAnimais) {
                 System.out.println("Qual o nome do animal que deseja transferir de recinto?");
                 String nome = scanner.next();
                 boolean animalExiste = false;
 
-                for (Recinto recinto : zoologico.recintos) {
+                for (Recinto recinto : zoologico.getRecintos()) {
                     for (Animal animal : recinto.getAnimais()) {
                         if (nome.equals(animal.getNome())) {
                             animalExiste = true;
                             System.out.println("O animal se encontra no recinto " + recinto.getNome());
                             System.out.println("Para qual recinto deseja trasnferi-lo?");
                             String nomeDoRecintoParaTrasnferir = scanner.next();
-                            for (int i = 0; i < zoologico.recintos.size(); i++) {
-                                if (nomeDoRecintoParaTrasnferir.equals(zoologico.recintos.get(i).getNome())) {
-                                    if (zoologico.recintos.get(i).estaLotado() == false){
-                                        animal.setRecinto(zoologico.recintos.get(i));
+                            for (int i = 0; i < zoologico.getRecintos().size(); i++) {
+                                if (nomeDoRecintoParaTrasnferir.equals(zoologico.getRecintos().get(i).getNome())) {
+                                    if (!zoologico.getRecintos().get(i).estaLotado()){
+                                        animal.setRecinto(zoologico.getRecintos().get(i));
                                         System.out.println("Animal trasnferido com sucesso!");
                                         animalParaTransferencia = animal;
                                         recintoTransferencia = nomeDoRecintoParaTrasnferir;
@@ -245,18 +248,16 @@ public class ZoologicoServices {
                     }
                 }
 
-                if (animalExiste == false){
+                if (!animalExiste){
                     System.out.println("Esse animal não existe em nosso zoológico, verifique se o nome foi digitado corretamente.");
                 }
 
-                for (Recinto recinto : zoologico.recintos){
-                    if (recinto.getAnimais().contains(animalParaTransferencia)){
-                        recinto.getAnimais().remove(animalParaTransferencia);
-                    }
+                for (Recinto recinto : zoologico.getRecintos()) {
+                    recinto.getAnimais().remove(animalParaTransferencia);
                 }
 
 
-                for (Recinto recinto : zoologico.recintos){
+                for (Recinto recinto : zoologico.getRecintos()){
                     if (recinto.getNome().equals(recintoTransferencia)){
                         recinto.adicionarAnimal(animalParaTransferencia);
                     }
@@ -276,34 +277,36 @@ public class ZoologicoServices {
 }
 
     public void alimentarAnimal() {
-    if (zoologico.recintos.size() != 0) {
+    if (!zoologico.getRecintos().isEmpty()) {
         /* Criar um metodo para percorrer animais e colocar aqui: */
         boolean haAnimais = false;
-        for (Recinto recinto : zoologico.recintos) {
+        for (Recinto recinto : zoologico.getRecintos()) {
             if (recinto.getAnimais() != null) {
                 haAnimais = true;
+                break;
             }
         }
 
-        if (haAnimais = true) {
-            if (zoologico.funcionarios.size() != 0) {
+        if (haAnimais) {
+            if (!zoologico.getFuncionarios().isEmpty()) {
                 boolean haTratadores = false;
-                for (Funcionario funcionario : zoologico.funcionarios){
+                for (Funcionario funcionario : zoologico.getFuncionarios()){
                     if (funcionario.getCargo() == Cargo.TRATADOR){
                         haTratadores = true;
+                        break;
                     }
                 }
 
-                if (haTratadores == true){
+                if (haTratadores){
                     boolean haTratadoresComEsseNome = false;
                     System.out.println("Qual o nome do animal que deseja alimentar?");
                     String nome = scanner.next();
-                    for (Recinto recinto : zoologico.recintos) {
+                    for (Recinto recinto : zoologico.getRecintos()) {
                         for (Animal animal : recinto.getAnimais()) {
                             if (animal.getNome().equals(nome)) {
                                 System.out.println("Qual tratador irá alimentar o animal? ");
                                 String nomeDoTratador = scanner.next();
-                                for (Funcionario funcionario : zoologico.funcionarios) {
+                                for (Funcionario funcionario : zoologico.getFuncionarios()) {
                                     if (nomeDoTratador.equals(funcionario.getNome()) && funcionario.getCargo() == Cargo.TRATADOR) {
                                         Tratador tratador = (Tratador) funcionario;
                                         tratador.alimentarAnimal(animal);
@@ -317,7 +320,7 @@ public class ZoologicoServices {
                         }
                     }
 
-                    if (haTratadoresComEsseNome == false){
+                    if (!haTratadoresComEsseNome){
                         System.out.println("Não Há tradores com esse nome no zoológico!");
                     }
                 } else {
@@ -335,20 +338,21 @@ public class ZoologicoServices {
 }
 
     public void examinarAnimal() {
-    if (zoologico.recintos.size() != 0) {
+    if (!zoologico.getRecintos().isEmpty()) {
         /*Criar metodo para varrer aniamis e colocar aqui: */
         boolean haAnimais = false;
-        for (Recinto recinto : zoologico.recintos) {
-            if (recinto.getAnimais().size() != 0) {
+        for (Recinto recinto : zoologico.getRecintos()) {
+            if (!recinto.getAnimais().isEmpty()) {
                 haAnimais = true;
+                break;
             }
         }
 
-        if (haAnimais = true) {
+        if (haAnimais) {
             System.out.println("Qual o nome do animal que deseja examinar? ");
             String nome = scanner.next();
 
-            for (Recinto recinto : zoologico.recintos) {
+            for (Recinto recinto : zoologico.getRecintos()) {
                 for (Animal animal : recinto.getAnimais()) {
                     if (nome.equals(animal.getNome())) {
                         animal.exibirDados();
@@ -367,14 +371,15 @@ public class ZoologicoServices {
 
     public void listarAnimais() {
     boolean haAnimais = false;
-    if (zoologico.recintos.size() != 0) {
-        for (Recinto recinto : zoologico.recintos) {
-            if (recinto.getAnimais().size() != 0) {
+    if (!zoologico.getRecintos().isEmpty()) {
+        for (Recinto recinto : zoologico.getRecintos()) {
+            if (!recinto.getAnimais().isEmpty()) {
                 haAnimais = true;
+                break;
             }
         }
-        if (haAnimais == true) {
-            for (Recinto recinto : zoologico.recintos) {
+        if (haAnimais) {
+            for (Recinto recinto : zoologico.getRecintos()) {
                 for (Animal animal : recinto.getAnimais()) {
                     animal.exibirDados();
                 }
@@ -388,8 +393,8 @@ public class ZoologicoServices {
 }
 
     public void listarRecintos() {
-    if (zoologico.recintos.size() != 0) {
-        for (Recinto recinto : zoologico.recintos) {
+    if (!zoologico.getRecintos().isEmpty()) {
+        for (Recinto recinto : zoologico.getRecintos()) {
             System.out.println(recinto.toString());
             System.out.println();
         }
